@@ -1,0 +1,26 @@
+FROM debian:10 as compiler_with_deps_image
+
+# activate archive package sources
+RUN sed -i 's|deb\.|archive\.|g' /etc/apt/sources.list
+
+# install build dependencies
+RUN apt update && \
+    apt install -y wget git cmake build-essential nano ninja-build \
+    python2-dev python-numpy python-zmq python-six python-mako \
+    libboost-all-dev libzmq3-dev && \
+    apt install -y libgsl-dev libsdl-dev libfftw3-dev swig libgsm1-dev libcodec2-dev && \
+    apt install -y libcppunit-dev
+
+FROM compiler_with_deps_image as compiling
+
+WORKDIR /
+RUN wget https://github.com/gnuradio/gnuradio/releases/download/v3.7.13.5/gnuradio-3.7.13.5.tar.gz
+RUN tar xf gnuradio-3.7.13.5.tar.gz
+
+WORKDIR /gnuradio-3.7.13.5/
+RUN mkdir build
+RUN cmake -B build -DCMAKE_C_FLAGS="-Wno-deprecated-declarations" \
+      -DCMAKE_CXX_FLAGS="-Wno-deprecated-declarations" \
+      -DENABLE_GR_AUDIO=OFF \
+      -DCMAKE_BUILD_TYPE=RelWithDebInfo .
+RUN cmake --build build --parallel $(($(nproc) + 2))

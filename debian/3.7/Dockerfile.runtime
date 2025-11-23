@@ -1,0 +1,25 @@
+# BASE_IMAGE will be the name of the compiling stage image.
+ARG BASE_IMAGE=debian:10
+
+FROM ${BASE_IMAGE} as compiler_stage
+WORKDIR build/
+RUN make install
+
+
+FROM debian:10 as runtime_image
+# activate archive package sources
+RUN sed -i 's|deb\.|archive\.|g' /etc/apt/sources.list
+
+# create virtual memory circular buffer (vmcircbuf) default config
+RUN mkdir -p /root/.gnuradio/prefs
+RUN echo "gr::vmcircbuf_mmap_factory" > /root/.gnuradio/prefs/vmcircbuf_default_factory
+
+# install runtime dependencies
+RUN apt update && \
+    apt install -y nano wget python python-six python-mako python-numpy python-zmq \
+        libboost-all-dev libgsl23 libgslcblas0 libsdl1.2debian libfftw3-3 libfftw3-bin
+
+COPY --from=compiler_stage /usr/local/ /usr/local/
+
+# make libraries known to dynamic linker
+RUN ldconfig
