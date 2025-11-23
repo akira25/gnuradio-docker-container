@@ -5,7 +5,7 @@ RUN sed -i 's|deb\.|archive\.|g' /etc/apt/sources.list
 
 # install build dependencies
 RUN apt update && \
-    apt install -y wget git cmake build-essential nano ninja-build \
+    apt install -y --no-recommends wget git cmake build-essential nano \
     python2-dev python-numpy python-zmq python-six python-mako \
     libboost-all-dev libzmq3-dev && \
     apt install -y libgsl-dev libsdl-dev libfftw3-dev swig libgsm1-dev libcodec2-dev && \

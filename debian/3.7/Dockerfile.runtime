@@ -7,6 +7,11 @@ RUN make install
 
 
 FROM debian:10 as runtime_image
+
+LABEL org.opencontainers.image.source=https://github.com/akira25/gnuradio-docker-container
+LABEL org.opencontainers.image.description="A minimal (headless) GNU Radio, packed into an docker container"
+LABEL org.opencontainers.image.licenses=MIT
+
 # activate archive package sources
 RUN sed -i 's|deb\.|archive\.|g' /etc/apt/sources.list
 
@@ -16,7 +21,8 @@ RUN echo "gr::vmcircbuf_mmap_factory" > /root/.gnuradio/prefs/vmcircbuf_default_
 
 # install runtime dependencies
 RUN apt update && \
-    apt install -y nano wget python python-six python-mako python-numpy python-zmq \
+    apt install -y --no-install-recommends --no-install-suggests \
+        python python-numpy python-zmq python-six python-mako \
         libboost-all-dev libgsl23 libgslcblas0 libsdl1.2debian libfftw3-3 libfftw3-bin
 
 COPY --from=compiler_stage /usr/local/ /usr/local/
