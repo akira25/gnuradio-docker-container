@@ -5,16 +5,16 @@ RUN sed -i 's|deb\.|archive\.|g' /etc/apt/sources.list
 
 # install build dependencies
 RUN apt update && \
-    apt install -y wget git cmake build-essential nano ninja-build \
+    apt install -y --no-install-recommends --no-install-suggests \
+    wget git cmake build-essential nano \
     python2-dev python-numpy python-zmq python-six python-mako \
-    libboost-all-dev libzmq3-dev && \
-    apt install -y libgsl-dev libsdl-dev libfftw3-dev swig libgsm1-dev libcodec2-dev && \
-    apt install -y libcppunit-dev
+    libboost-all-dev libzmq3-dev libgsl-dev libsdl-dev libfftw3-dev \
+    swig libgsm1-dev libcodec2-dev libcppunit-dev
 
 FROM compiler_with_deps_image as compiling
 
 WORKDIR /
-RUN wget https://github.com/gnuradio/gnuradio/releases/download/v3.7.13.5/gnuradio-3.7.13.5.tar.gz
+RUN wget --no-check-certificate https://github.com/gnuradio/gnuradio/releases/download/v3.7.13.5/gnuradio-3.7.13.5.tar.gz
 RUN tar xf gnuradio-3.7.13.5.tar.gz
 
 WORKDIR /gnuradio-3.7.13.5/
