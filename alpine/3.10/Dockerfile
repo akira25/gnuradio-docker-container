@@ -24,7 +24,7 @@ ADD . /gnuradio
 
 USER abuild
 RUN abuild-keygen -a -i -n
-RUN abuild -r
+#RUN abuild -r
 
 # step image with installing custom gnuradio version
 FROM alpine:3.21 AS alpine_gr
@@ -33,6 +33,6 @@ LABEL org.opencontainers.image.source=https://github.com/Akira25/gnuradio-docker
 LABEL org.opencontainers.image.description="A minimal (headless) GNU Radio, packed into an alpine docker container"
 LABEL org.opencontainers.image.licenses=MIT
 
-COPY --from=build /home/abuild/packages/*/gnuradio-*.apk /gnuradio_apks/
-RUN apk add --allow-untrusted --no-cache /gnuradio_apks/gnuradio-*.apk
+#COPY --from=build /home/abuild/packages/*/gnuradio-*.apk /gnuradio_apks/
+#RUN apk add --allow-untrusted --no-cache /gnuradio_apks/gnuradio-*.apk
 RUN apk add --no-cache zeromq py3-pyzmq
