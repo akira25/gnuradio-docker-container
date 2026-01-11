@@ -1,0 +1,69 @@
+name: Build Docker image (single arch)
+
+on:
+  workflow_call:
+    inputs:
+      base_os:
+        required: true
+        type: string
+      version:
+        required: true
+        type: string
+      platform:
+        required: true
+        type: string
+      runner:
+        required: true
+        type: string
+      image_suffix:
+        required: true
+        type: string
+    secrets:
+      DOCKER_USERNAME:
+        required: true
+      DOCKER_PASSWORD:
+        required: true
+
+env:
+  IMAGE_NAMESPACE: ${{ github.repository_owner }}
+  IMAGE_NAME: gnuradio-docker-container
+
+jobs:
+  build:
+    runs-on: ${{ inputs.runner }}
+    name: Build ${{ inputs.base_os }}-${{ inputs.version }} (${{ inputs.platform }})
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Login to ghcr
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Login to dockerhub
+        uses: docker/login-action@v3
+        with:
+          registry: docker.io
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build & push image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./${{ inputs.base_os }}/${{ inputs.version }}
+          file: ./${{ inputs.base_os }}/${{ inputs.version }}/Dockerfile
+          platforms: ${{ inputs.platform }}
+          push: true
+          # Provenance false prevents generating manifests per architecture
+          provenance: false
+          # Cache in the container-registry, to speed up builds
+          #cache-from: type=registry,ref=ghcr.io/${{ env.IMAGE_NAMESPACE }}/${{ env.IMAGE_NAME }}:cache-${{ inputs.image_suffix }}
+          #cache-to: type=registry,ref=ghcr.io/${{ env.IMAGE_NAMESPACE }}/${{ env.IMAGE_NAME }}:cache-${{ inputs.image_suffix }},mode=max
+          tags: |
+            ghcr.io/${{ env.IMAGE_NAMESPACE }}/${{ env.IMAGE_NAME }}:${{ inputs.base_os }}-${{ inputs.version }}-${{ inputs.image_suffix }}
+            docker.io/${{ secrets.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}:${{ inputs.base_os }}-${{ inputs.version }}-${{ inputs.image_suffix }}
