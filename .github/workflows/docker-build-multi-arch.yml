@@ -1,0 +1,98 @@
+name: Build Multi-Arch Docker Images
+
+on:
+  push:
+    branches:
+      - main
+      - restructure_ci
+  workflow_dispatch:
+
+env:
+  IMAGE_NAMESPACE: ${{ github.repository_owner }}
+  IMAGE_NAME: myimage
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  define-matrix:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.matrix.outputs.matrix }}
+    steps:
+      - id: matrix
+        run: |
+          echo 'matrix={ "include": [ { "base_os": "alpine", "version": "3.10" }, { "base_os": "debian", "version": "3.10" } ] }' >> "$GITHUB_OUTPUT"
+
+  build-amd64:
+    needs: define-matrix
+    strategy:
+      matrix: ${{ fromJson(needs.define-matrix.outputs.matrix) }}
+    uses: ./.github/workflows/docker-build-single-arch.yml
+    with:
+      base_os: ${{ matrix.base_os }}
+      version: ${{ matrix.version }}
+      platform: linux/amd64
+      runner: ubuntu-latest
+      image_suffix: amd64
+    secrets:
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+
+  build-arm64:
+    needs: define-matrix
+    strategy:
+      matrix: ${{ fromJson(needs.define-matrix.outputs.matrix) }}
+    uses: ./.github/workflows/docker-build-single-arch.yml
+    with:
+      base_os: ${{ matrix.base_os }}
+      version: ${{ matrix.version }}
+      platform: linux/arm64
+      runner: ubuntu-24.04-arm
+      image_suffix: arm64
+    secrets:
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+
+  manifest:
+    needs:
+      - define-matrix
+      - build-amd64
+      - build-arm64
+    runs-on: ubuntu-latest
+    strategy:
+      matrix: ${{ fromJson(needs.define-matrix.outputs.matrix) }}
+
+    steps:
+      - name: Login to ghcr
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Login to dockerhub
+        uses: docker/login-action@v3
+        with:
+          registry: docker.io
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Create and push manifest
+        run: |
+          docker manifest create \
+            ghcr.io/${{ env.IMAGE_NAMESPACE }}/${{ env.IMAGE_NAME }}:${{ matrix.base_os }}-${{ matrix.version }} \
+            --amend ghcr.io/${{ env.IMAGE_NAMESPACE }}/${{ env.IMAGE_NAME }}:${{ matrix.base_os }}-${{ matrix.version }}-amd64 \
+            --amend ghcr.io/${{ env.IMAGE_NAMESPACE }}/${{ env.IMAGE_NAME }}:${{ matrix.base_os }}-${{ matrix.version }}-arm64
+
+          docker manifest push \
+            ghcr.io/${{ env.IMAGE_NAMESPACE }}/${{ env.IMAGE_NAME }}:${{ matrix.base_os }}-${{ matrix.version }}
+
+          docker manifest create \
+            docker.io/${{ env.IMAGE_NAMESPACE }}/${{ env.IMAGE_NAME }}:${{ matrix.base_os }}-${{ matrix.version }} \
+            --amend docker.io/${{ env.IMAGE_NAMESPACE }}/${{ env.IMAGE_NAME }}:${{ matrix.base_os }}-${{ matrix.version }}-amd64 \
+            --amend docker.io/${{ env.IMAGE_NAMESPACE }}/${{ env.IMAGE_NAME }}:${{ matrix.base_os }}-${{ matrix.version }}-arm64
+
+          docker manifest push \
+            docker.io/${{ env.IMAGE_NAMESPACE }}/${{ env.IMAGE_NAME }}:${{ matrix.base_os }}-${{ matrix.version }}
