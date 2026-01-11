@@ -23,7 +23,7 @@ jobs:
     steps:
       - id: matrix
         run: |
-          echo 'matrix={ "include": [ { "base_os": "alpine", "version": "3.10" } ] }' >> "$GITHUB_OUTPUT"
+          echo 'matrix={ "include": [ { "base_os": "alpine", "version": "3.10" }, { "base_os": "debian", "version": "3.7" } ] }' >> "$GITHUB_OUTPUT"
 
   build-amd64:
     needs: define-matrix
