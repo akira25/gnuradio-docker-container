@@ -48,6 +48,8 @@ We expect the containers to be run in the host network. That simplifies communic
 
 To circumvent complicated redirections, e.g., with audio or USB devices, we expect additional flowgraphs using ZMQ-Blocks, which control audio, hardware, and so on, to be run directly on the Host system without a Docker container.
 
+_Improving Performance: Using TCP as base for the transport mechanism holds some unessesary overhead, when you stay on the same host machine. TCPs Slow-Start machnism will ZMQ force to drop some samples at startup. I published a refined approach using unix-domain-sockets at [akira25/gnuradio-docker-container-unix-sockets](https://github.com/akira25/gnuradio-docker-container-unix-sockets)._
+
 ## Demonstration
 
 To build a demonstration on your computer, follow this section's steps. We used `podman` as the container runtime. Still, you should be able to run these commands perfectly with docker by just replacing `podman` with the `docker` command:
