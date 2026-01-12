@@ -96,3 +96,14 @@ jobs:
 
           docker manifest push \
             docker.io/${{ env.IMAGE_NAMESPACE }}/${{ env.IMAGE_NAME }}:${{ matrix.base_os }}-${{ matrix.version }}
+
+      - name: Tag alpine-3.10 as latest
+        if: matrix.base_os == 'alpine' && matrix.version == '3.10'
+        run: |
+          docker buildx imagetools create \
+            --tag ghcr.io/${{ env.IMAGE_NAMESPACE }}/${{ env.IMAGE_NAME }}:latest \
+            ghcr.io/${{ env.IMAGE_NAMESPACE }}/${{ env.IMAGE_NAME }}:alpine-3.10
+
+          docker buildx imagetools create \
+            --tag docker.io/${{ env.IMAGE_NAMESPACE }}/${{ env.IMAGE_NAME }}:latest \
+            docker.io/${{ env.IMAGE_NAMESPACE }}/${{ env.IMAGE_NAME }}:alpine-3.10
