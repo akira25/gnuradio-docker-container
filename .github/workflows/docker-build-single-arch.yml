@@ -62,8 +62,8 @@ jobs:
           # Provenance false prevents generating manifests per architecture
           provenance: false
           # Cache in the container-registry, to speed up builds
-          #cache-from: type=registry,ref=ghcr.io/${{ env.IMAGE_NAMESPACE }}/${{ env.IMAGE_NAME }}:cache-${{ inputs.image_suffix }}
-          #cache-to: type=registry,ref=ghcr.io/${{ env.IMAGE_NAMESPACE }}/${{ env.IMAGE_NAME }}:cache-${{ inputs.image_suffix }},mode=max
+          cache-from: type=registry,ref=ghcr.io/${{ env.IMAGE_NAMESPACE }}/${{ env.IMAGE_NAME }}:cache-${{ inputs.image_suffix }}
+          cache-to: type=registry,ref=ghcr.io/${{ env.IMAGE_NAMESPACE }}/${{ env.IMAGE_NAME }}:cache-${{ inputs.image_suffix }},mode=max
           tags: |
             ghcr.io/${{ env.IMAGE_NAMESPACE }}/${{ env.IMAGE_NAME }}:${{ inputs.base_os }}-${{ inputs.version }}-${{ inputs.image_suffix }}
             docker.io/${{ secrets.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}:${{ inputs.base_os }}-${{ inputs.version }}-${{ inputs.image_suffix }}
