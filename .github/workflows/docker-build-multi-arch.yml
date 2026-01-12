@@ -96,3 +96,20 @@ jobs:
 
           docker manifest push \
             docker.io/${{ env.IMAGE_NAMESPACE }}/${{ env.IMAGE_NAME }}:${{ matrix.base_os }}-${{ matrix.version }}
+
+      - name: Tag alpine-3.10 as latest
+        if: matrix.base_os == 'alpine' && matrix.version == '3.10'
+        run: |
+          docker manifest create \
+            ghcr.io/${{ env.IMAGE_NAMESPACE }}/${{ env.IMAGE_NAME }}:latest \
+            --amend ghcr.io/${{ env.IMAGE_NAMESPACE }}/${{ env.IMAGE_NAME }}:alpine-3.10
+
+          docker manifest push \
+            ghcr.io/${{ env.IMAGE_NAMESPACE }}/${{ env.IMAGE_NAME }}:latest
+
+          docker manifest create \
+            docker.io/${{ env.IMAGE_NAMESPACE }}/${{ env.IMAGE_NAME }}:latest \
+            --amend docker.io/${{ env.IMAGE_NAMESPACE }}/${{ env.IMAGE_NAME }}:alpine-3.10
+
+          docker manifest push \
+            docker.io/${{ env.IMAGE_NAMESPACE }}/${{ env.IMAGE_NAME }}:latest
