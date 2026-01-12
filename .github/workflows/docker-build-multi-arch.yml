@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - restructure_ci
+      - fix_ci
   workflow_dispatch:
 
 env:
