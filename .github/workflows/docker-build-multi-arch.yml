@@ -28,6 +28,7 @@ jobs:
   build-amd64:
     needs: define-matrix
     strategy:
+      max-parallel: 2
       matrix: ${{ fromJson(needs.define-matrix.outputs.matrix) }}
     uses: ./.github/workflows/docker-build-single-arch.yml
     with:
@@ -43,6 +44,7 @@ jobs:
   build-arm64:
     needs: define-matrix
     strategy:
+      max-parallel: 2
       matrix: ${{ fromJson(needs.define-matrix.outputs.matrix) }}
     uses: ./.github/workflows/docker-build-single-arch.yml
     with:
