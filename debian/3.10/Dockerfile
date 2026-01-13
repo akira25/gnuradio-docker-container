@@ -73,10 +73,10 @@ RUN cmake --install build/
 FROM debian:12-slim AS runtime_image
 
 # create virtual memory circular buffer (vmcircbuf) default config
-#RUN mkdir -p /root/.gnuradio/prefs
-#COPY <<EOF /root/.gnuradio/prefs/vmcircbuf_default_factory
-#gr::vmcircbuf_mmap_factory
-#EOF
+RUN mkdir -p /root/.gnuradio/prefs
+COPY <<EOF /root/.gnuradio/prefs/vmcircbuf_default_factory
+gr::vmcircbuf_mmap_factory
+EOF
 
 # install runtime dependencies
 RUN apt update && \
