@@ -2,6 +2,10 @@
 
 This repository shows a concept for packaging GNU-Radio flowgraphs into Linux docker containers. Compared to other approaches, we focus on small container size and enhanced modularity.
 
+> [!TIP]
+> Main Repository: [codeberg.org/akira25/gnuradio-docker-container](https://codeberg.org/akira25/iqconvert). Please contribute there.
+
+
 ## Supported tags
 
 Tags comprise the GNU Radio version and the respective base image. For example, `3.10-alpine` denotes a minimal GNU Radio 3.10 on an alpine base.
